@@ -48,6 +48,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'helper/ssh';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="prev" title="Laboratoire 1 --- Introduction" href="../lab_01/lab_01.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="fr"/>
   <meta name="docsearch:version" content="" />
@@ -99,8 +100,6 @@
       
       
       
-        
-      
       <dialog id="pst-primary-sidebar-modal"></dialog>
       <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
@@ -145,10 +144,12 @@
 </button></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
-        <ul class="nav bd-sidenav">
+        <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="helper.html">Helper</a></li>
 <li class="toctree-l1"><a class="reference internal" href="eval_criterion.html">Consigne de rendu</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../lab_00/lab_00.html">Laboratoire 0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab_01/lab_01.html">Laboratoire 1</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Mise en place SSH</a></li>
 </ul>
 
     </div>
@@ -310,53 +311,53 @@
   <section id="mise-en-place-de-ssh-sur-la-carte">
 <span id="ssh"></span><h1>Mise en place de SSH sur la carte<a class="headerlink" href="#mise-en-place-de-ssh-sur-la-carte" title="Lien vers cette rubrique">#</a></h1>
 <p>Cette page vous présente comment configurer les connexions SSH sur la carte.
-Ceci permet d’avoir plusieurs terminaux ouverts simultanément,
-ainsi qu’un meilleur support de ceux-ci (détection de la taille, …)
+Ceci permet d'avoir plusieurs terminaux ouverts simultanément,
+ainsi qu'un meilleur support de ceux-ci (détection de la taille, ...)
 Attention, il est possible que la connexion prenne un peu de temps !</p>
 <p>Les deux méthodes, via mot de passe ou clé SSH sont présentées.
-Seul l’une des deux méthodes a besoin d’être faite, de préférence avec les clés SSH.</p>
+Seul l'une des deux méthodes a besoin d'être faite, de préférence avec les clés SSH.</p>
 <section id="connexion-par-mot-de-passe">
 <h2>Connexion par mot de passe<a class="headerlink" href="#connexion-par-mot-de-passe" title="Lien vers cette rubrique">#</a></h2>
-<p>La méthode la plus simple est de configurer un mot de passe pour l’utilisateur root.
-Pour cela, exécuter la commande <code class="code highlight bash docutils literal highlight-bash">passwd</code> sur la carte (via l’UART) pour modifier
-le mot de passe de l’utilisateur root.</p>
-<p>Vérifiez également que l’option <cite>PasswordAuthentication</cite> dans le fichier <cite>/etc/ssh/sshd_config</cite>
-soit mise à <cite>yes</cite> ou en commentaire. Si ce n’est pas le cas, modifier la ligne et redémarrer le service ssh :</p>
+<p>La méthode la plus simple est de configurer un mot de passe pour l'utilisateur root.
+Pour cela, exécuter la commande <code class="code highlight bash docutils literal highlight-bash">passwd</code> sur la carte (via l'UART) pour modifier
+le mot de passe de l'utilisateur root.</p>
+<p>Vérifiez également que l'option <cite>PasswordAuthentication</cite> dans le fichier <cite>/etc/ssh/sshd_config</cite>
+soit mise à <cite>yes</cite> ou en commentaire. Si ce n'est pas le cas, modifier la ligne et redémarrer le service ssh :</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>service<span class="w"> </span>ssh<span class="w"> </span>restart
 </pre></div>
 </div>
-<p>Après avoir choisi un mot de passe, vous pouvez vous connecter à l’aide de :</p>
+<p>Après avoir choisi un mot de passe, vous pouvez vous connecter à l'aide de :</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>ssh<span class="w"> </span>root@192.168.0.2
 </pre></div>
 </div>
 </section>
 <section id="connexion-par-cle">
 <h2>Connexion par clé<a class="headerlink" href="#connexion-par-cle" title="Lien vers cette rubrique">#</a></h2>
-<p>Pour se connecter à l’aide d’une clé SSH,
-il faut d’abord générer une clé SSH, si elle n’a pas déjà été créée, sur l’ordinateur hôte/VM à l’aide de :</p>
+<p>Pour se connecter à l'aide d'une clé SSH,
+il faut d'abord générer une clé SSH, si elle n'a pas déjà été créée, sur l'ordinateur hôte/VM à l'aide de :</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>ssh-keygen<span class="w"> </span>-t<span class="w"> </span>ecdsa
 </pre></div>
 </div>
 <p>Vous pouvez généralement faire trois fois <em>enter</em> pour créer la clé.</p>
-<p>La raison d’utiliser l’algorithme <em>ECDSA</em> est dû à un changement récent dans le client SSH qui requiert une version
-plus sécurisée de l’algorithme <em>RSA</em> côté serveur qui n’est pas disponible sur la carte et ne permet pas donc pas
-la connexion par défaut avec <em>RSA</em>. Utilisé l’algorithme <em>ECDSA</em> est le plus simple pour faire fonctionner avec
+<p>La raison d'utiliser l'algorithme <em>ECDSA</em> est dû à un changement récent dans le client SSH qui requiert une version
+plus sécurisée de l'algorithme <em>RSA</em> côté serveur qui n'est pas disponible sur la carte et ne permet pas donc pas
+la connexion par défaut avec <em>RSA</em>. Utilisé l'algorithme <em>ECDSA</em> est le plus simple pour faire fonctionner avec
 les versions récentes du client.
-<a class="reference external" href="https://security.stackexchange.com/questions/270349/understanding-ssh-rsa-not-in-pubkeyacceptedalgorithms">Voir ici pour plus d’info</a></p>
+<a class="reference external" href="https://security.stackexchange.com/questions/270349/understanding-ssh-rsa-not-in-pubkeyacceptedalgorithms">Voir ici pour plus d'info</a></p>
 <p>Ensuite, si la connexion par mot de passe a été activée, effectuez :</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>ssh-copy-id<span class="w"> </span>root@192.168.0.2
 </pre></div>
 </div>
-<p>Si la connexion par mot de passe n’est pas activée, créez le fichier <code class="file docutils literal notranslate"><span class="pre">.ssh/authorized_keys</span></code> avec les bonnes permissions :</p>
+<p>Si la connexion par mot de passe n'est pas activée, créez le fichier <code class="file docutils literal notranslate"><span class="pre">.ssh/authorized_keys</span></code> avec les bonnes permissions :</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mkdir<span class="w"> </span>.ssh
 <span class="gp">$ </span>touch<span class="w"> </span>.ssh/authorized_keys
 <span class="gp">$ </span>chmod<span class="w"> </span><span class="m">700</span><span class="w"> </span>.ssh
 <span class="gp">$ </span>chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>.ssh/authorized_keys
 </pre></div>
 </div>
-<p>Puis copiez le contenu du fichier <code class="file docutils literal notranslate"><span class="pre">~/.ssh/id_ecdsa.pub</span></code> sur l’hôte/VM
-et coller dans le fichier <code class="file docutils literal notranslate"><span class="pre">~/.ssh/authorized_keys</span></code> sur la carte à l’aide de vi/vim ou nano.</p>
-<p>Vous devriez pouvoir vous connecter à l’aide de :</p>
+<p>Puis copiez le contenu du fichier <code class="file docutils literal notranslate"><span class="pre">~/.ssh/id_ecdsa.pub</span></code> sur l'hôte/VM
+et coller dans le fichier <code class="file docutils literal notranslate"><span class="pre">~/.ssh/authorized_keys</span></code> sur la carte à l'aide de vi/vim ou nano.</p>
+<p>Vous devriez pouvoir vous connecter à l'aide de :</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>ssh<span class="w"> </span>root@192.168.0.2
 </pre></div>
 </div>
@@ -374,6 +375,15 @@ et coller dans le fichier <code class="file docutils literal notranslate"><span 
                 <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
+    <a class="left-prev"
+       href="../lab_01/lab_01.html"
+       title="page précédente">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">précédent</p>
+        <p class="prev-next-title">Laboratoire 1 --- Introduction</p>
+      </div>
+    </a>
 </div>
                 </footer>
               

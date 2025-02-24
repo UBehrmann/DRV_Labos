@@ -48,8 +48,8 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'helper/helper';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Recherche" href="../search.html" />
-    <link rel="next" title="Critère d’évaluation" href="eval_criterion.html" />
-    <link rel="prev" title="Laboratoire de Conception de Drivers — Semestre de printemps 2024-2025" href="../index.html" />
+    <link rel="next" title="Critère d&#39;évaluation" href="eval_criterion.html" />
+    <link rel="prev" title="Laboratoire de Conception de Drivers --- Semestre de printemps 2024-2025" href="../index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="fr"/>
   <meta name="docsearch:version" content="" />
@@ -149,6 +149,8 @@
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Helper</a></li>
 <li class="toctree-l1"><a class="reference internal" href="eval_criterion.html">Consigne de rendu</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../lab_00/lab_00.html">Laboratoire 0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab_01/lab_01.html">Laboratoire 1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ssh.html">Mise en place SSH</a></li>
 </ul>
 
     </div>
@@ -313,11 +315,11 @@
 <p>Afin de vérifier le respect du style de code du kernel Linux, le script <code class="code highlight bash docutils literal highlight-bash">style_check</code> est mis à disposition.
 Celui-ci se trouve dans le dossier <code class="code highlight bash docutils literal highlight-bash">material/helper</code>. Il prend comme unique argument le fichier à contrôler.
 Avant utilisation, il faut installer les outils <code class="code highlight bash docutils literal highlight-bash">meld</code> et <code class="code highlight bash docutils literal highlight-bash">clang-format</code> (<code class="code highlight bash docutils literal highlight-bash">sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>meld<span class="w"> </span>clang-format</code>).</p>
-<p>L’outil <code class="code highlight bash docutils literal highlight-bash">meld</code> est une interface graphique montrant les différences entre deux fichiers côte à côte et d’appliquer les changements directement dans le fichier voulu.
+<p>L'outil <code class="code highlight bash docutils literal highlight-bash">meld</code> est une interface graphique montrant les différences entre deux fichiers côte à côte et d'appliquer les changements directement dans le fichier voulu.
 Il est très utile lors de merge ou pour voir ce qui à changer dans le code avec Git.
-Les commandes <code class="code highlight bash docutils literal highlight-bash">git<span class="w"> </span>difftool</code> et <code class="code highlight bash docutils literal highlight-bash">git<span class="w"> </span>mergetool</code> dans un repo Git permet de l’utiliser pour ces cas-là.</p>
-<p>Le script fourni fait en sorte que le fichier de gauche soit l’original et celui de droite la version formatée par <code class="code highlight bash docutils literal highlight-bash">clang-format</code>.
-Ce dernier est en fichier temporaire et sera supprimé après fermeture de l’outil. Vous pouvez cependant appliquer les différences sur le fichier original !
+Les commandes <code class="code highlight bash docutils literal highlight-bash">git<span class="w"> </span>difftool</code> et <code class="code highlight bash docutils literal highlight-bash">git<span class="w"> </span>mergetool</code> dans un repo Git permet de l'utiliser pour ces cas-là.</p>
+<p>Le script fourni fait en sorte que le fichier de gauche soit l'original et celui de droite la version formatée par <code class="code highlight bash docutils literal highlight-bash">clang-format</code>.
+Ce dernier est en fichier temporaire et sera supprimé après fermeture de l'outil. Vous pouvez cependant appliquer les différences sur le fichier original !
 <code class="code highlight bash docutils literal highlight-bash">clang-format</code> est un bon outil de formatage automatique, mais ne permet pas de tout faire, garder un oeil critique sur les changements proposés.</p>
 <p>Pour simplifier son utilisation, un lien symbolique peut être créé vers le script dans le dossier <code class="code highlight bash docutils literal highlight-bash">/usr/bin/local</code></p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>sudo<span class="w"> </span>ln<span class="w"> </span>-s<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/material/helper/style_check.sh<span class="w"> </span>/usr/local/bin/style_check
@@ -328,7 +330,7 @@ Ce dernier est en fichier temporaire et sera supprimé après fermeture de l’o
 <figcaption>
 <p><span class="caption-number">Fig. 1 </span><span class="caption-text">Exemple de meld sur un fichier, avec à gauche le fichier original et à droite les corrections proposées automatiquement.
 Ici, certaines indentations était faite avec des espaces et sont donc corrigées en tabulation, également certains espacements
-n’étaient pas correctement respecté.</span><a class="headerlink" href="#id2" title="Lien vers cette image">#</a></p>
+n'étaient pas correctement respecté.</span><a class="headerlink" href="#id2" title="Lien vers cette image">#</a></p>
 </figcaption>
 </figure>
 </section>
@@ -351,7 +353,7 @@ n’étaient pas correctement respecté.</span><a class="headerlink" href="#id2"
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">précédent</p>
-        <p class="prev-next-title">Laboratoire de Conception de Drivers — Semestre de printemps 2024-2025</p>
+        <p class="prev-next-title">Laboratoire de Conception de Drivers --- Semestre de printemps 2024-2025</p>
       </div>
     </a>
     <a class="right-next"
@@ -359,7 +361,7 @@ n’étaient pas correctement respecté.</span><a class="headerlink" href="#id2"
        title="page suivante">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">suivant</p>
-        <p class="prev-next-title">Critère d’évaluation</p>
+        <p class="prev-next-title">Critère d'évaluation</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
