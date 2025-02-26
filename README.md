@@ -1,6 +1,6 @@
 # Laboratoire Driver
 
-Fork du projet [drv25_student]{https://reds-gitlab.heig-vd.ch/reds-public/drv25_student} pour le cours de *Développement de Driver* à la HEIG-VD.
+Fork du projet [drv25_student](https://reds-gitlab.heig-vd.ch/reds-public/drv25_student) pour le cours de *Développement de Driver* à la HEIG-VD.
 
 ## Membres du groupe
 
