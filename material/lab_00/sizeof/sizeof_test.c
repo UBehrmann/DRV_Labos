@@ -4,7 +4,7 @@
 
 char str_out[] = "my nice, quite long string (for sure more than 8 bytes...)";
 
-void print_size(char str_array[])
+void print_size(char *str_array)
 {
 	int int_var;
 	float float_var;

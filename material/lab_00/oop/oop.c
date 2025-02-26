@@ -148,6 +148,40 @@ struct Shape *Circle_init(int initx, int inity, int initr)
 
 #define Shape_DESTROY(obj) (((struct Shape *) (obj)) -> funcTable->destructor_((obj)))
 
+/* Parallélépipède class */
+struct Parallelepipede {
+	struct Rectangle super;
+	int depth;
+};
+
+
+void Parallelepipede_printArea(struct Shape *obj)
+{
+	struct Parallelepipede *pdata = (struct Parallelepipede *) obj;
+	int area = pdata->super.width * pdata->super.height * pdata->depth;
+	printf("Parallelepipede area is %d\n", area);
+}
+
+void Parallelepipede_printVolume(struct Shape *obj)
+{
+	struct Parallelepipede *pdata = (struct Parallelepipede *) obj;
+	int volume = pdata->super.width * pdata->super.height * pdata->depth;
+	printf("Parallelepipede volume is %d\n", volume);
+}
+
+struct ParallelepipedeFuncTable
+{
+	struct ShapeFuncTable super;
+	void (*printVolume) (struct Shape *obj);
+} parallelepipedeFuncTable = {
+			{
+			 .printArea = Parallelepipede_printArea,
+			 .moveTo = Rectangle_moveTo,
+			 .destructor_ = Rectangle_destroy
+			},
+			.printVolume = Parallelepipede_printVolume
+};
+
 /*A function that uses a Shape polymorphically */
 void handleShape(struct Shape *s) {
 	Shape_MOVETO(s, 0, 0);
