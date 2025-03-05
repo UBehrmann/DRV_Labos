@@ -4,7 +4,7 @@
 
 # Auteur <!-- omit in toc -->
 
-Urs Behrmann
+- Urs Behrmann
 
 # Table des matières <!-- omit in toc -->
 

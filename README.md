@@ -6,6 +6,12 @@ Fork du projet [drv25_student](https://reds-gitlab.heig-vd.ch/reds-public/drv25_
 
 - Urs Behrmann
 
+# Setup de la DE1-SoC
+
+## Configurer le MODE SELECT (MSEL)
+
+![MODE SELECT (MSEL)](/docs/_images/msel.png)
+
 # Commandes pour les labos
 
 ## Fetch des nouveaux Labos
