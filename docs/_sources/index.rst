@@ -10,8 +10,8 @@ Laboratoire de Conception de Drivers --- Semestre de printemps 2024-2025
    Laboratoire 0 <lab_00/lab_00>
    Laboratoire 1 <lab_01/lab_01>
    Mise en place SSH <helper/ssh>
-..   Tuto 1 <tuto_01/tuto_01>
-..   Laboratoire 2 <lab_02/lab_02>
+   Tuto 1 <tuto_01/tuto_01>
+   Laboratoire 2 <lab_02/lab_02>
 ..   Tuto 2 <tuto_02/tuto_02>
 ..   Laboratoire 3 <lab_03/lab_03>
 ..   Laboratoire 4 <lab_04/lab_04>
