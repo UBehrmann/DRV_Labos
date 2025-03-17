@@ -73,14 +73,34 @@ setenv mmcboot "setenv bootargs console=ttyS0,115200 root=${mmcroot} rw rootwait
 saveenv
 ```
 
+1. Configurer la mac address de la carte
+   1. 'ethaddr "12:34:56:78:90:12"'
+2. Configurer le réseau
+   1. 'serverip "192.168.0.1"'
+   2. 'ipaddr "192.168.0.2"'
+   3. 'gatewayip "192.168.0.1"'
+3. Configurer le délai de boot
+   1. 'bootdelay "2"'
+4. Configuration des adresses mémoire
+   1. 'loadaddr "0xF000"'
+5. Commande de démarrage automatique
+   1. 'bootcmd "mmc rescan; tftpboot ${loadaddr} zImage; tftpboot ${fdtaddr} ${fdtimage}; run fpgaload; run bridge_enable_handoff; run mmcboot"'
+6. Séquence de démarrage Linux
+   1. 'mmcboot "setenv bootargs console=ttyS0,115200 root=${mmcroot} rw rootwait ip=${ipaddr}:${serverip}:${serverip}:255.255.255.0:de1soclinux:eth0:on; bootz ${loadaddr} - ${fdtaddr}"'
+7. Sauvegarde de la configuration
+   1. 'saveenv'
+
 ___
 
 # Vérification des toolchains
 
-Pourriez-vous expliquer la signification des différents mots composant le nom de la toolchain? Pourquoi on a spécifié un numéro de version ? Qu'est-ce qui se passe si l'on prend tout simplement la toute dernière version de la toolchain?
+**Pourriez-vous expliquer la signification des différents mots composant le nom de la toolchain? Pourquoi on a spécifié un numéro de version ? Qu'est-ce qui se passe si l'on prend tout simplement la toute dernière version de la toolchain?**
 
+La toolchain arm-linux-gnueabihf-6.4.1 est une chaîne de compilation croisée destinée aux processeurs ARM, fonctionnant sous Linux avec une ABI (Application Binary Interface) EABI Hard Float. Le suffixe gnueabihf indique que cette toolchain utilise la glibc GNU et prend en charge les calculs en virgule flottante matérielle (hard float) pour de meilleures performances sur les processeurs ARM compatibles. La version 6.4.1 fait référence au compilateur GCC 6.4.1, garantissant une compatibilité et une stabilité éprouvées pour les systèmes embarqués, tout en bénéficiant des optimisations et corrections de cette version.
 
-Pourriez-vous expliquer ce que la ligne ci-dessus fait?
+**Pourriez-vous expliquer ce que la ligne ci-dessus fait?**
+
+La ligne compile un programme C minimal en un exécutable ARM et affiche ses informations via la commande file.
 
 ```bash
 echo "int main(){}" | arm-linux-gnueabihf-gcc-6.4.1 -x c - -o /dev/stdout | file -
@@ -92,17 +112,15 @@ echo "int main(){}" | arm-linux-gnueabihf-gcc-6.4.1 -x c - -o /dev/stdout | file
 /dev/stdin: ELF 32-bit LSB executable, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-armhf.so.3, for GNU/Linux 2.6.32, BuildID[sha1]=b7a0db97fce5c152f9ae99800a40817aba3cfa1d, with debug_info, not stripped
 ```
 
-Savez-vous interpréter ces réponses ?
+**Que signifie "not stripped" ?**
 
-Que signifie "not stripped" ?
-
+L’exécutable contient encore les symboles de débogage et autres métadonnées, ce qui augmente sa taille.
 
 ___
 
 # Compilation sur la cible (native)
 
-
-Quelle version de GCC est installée sur la carte ?
+**Quelle version de GCC est installée sur la carte ?**
 
 ```bash
 root@de1soclinux:~# arm-linux-gnueabihf-gcc --version
@@ -111,6 +129,8 @@ Copyright (C) 2011 Free Software Foundation, Inc.
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ```
+
+La version de GCC installée sur la carte est 4.6.3 (Ubuntu/Linaro 4.6.3-1ubuntu5).
 
 ___
 
@@ -124,12 +144,14 @@ $ file hello_cross
 hello_cross: ELF 32-bit LSB executable, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-armhf.so.3, for GNU/Linux 2.6.32, BuildID[sha1]=fe4b724f54424e522425b6a72d0eb6d0cdf60784, with debug_info, not stripped
 ```
 
-Qu'est-ce qui se passerait si vous essayiez d'exécuter ce fichier sur votre PC ? Pourquoi ?
+**Qu'est-ce qui se passerait si vous essayiez d'exécuter ce fichier sur votre PC ? Pourquoi ?**
 
 ```bash
 ./hello_cross
 bash: ./hello_cross: cannot execute binary file: Exec format error
 ```
+
+L'exécution échoue avec "Exec format error" car hello_cross est un binaire compilé pour ARM (ELF 32-bit LSB ARM), alors que mon PC utilise  une architecture x86_64. Le processeur ne peut pas exécuter un binaire destiné à une autre architecture.
 
 ## Compilation statique
 
@@ -154,7 +176,7 @@ ___
 
 ## Exercice 1
 
-Expliquez les différences entre les lignes ci-dessous.
+**Expliquez les différences entre les lignes ci-dessous.**
 
 ```bash
 md.b 0x80008000 0x1
@@ -171,7 +193,14 @@ md.l 0x80008000 0x4
 80008000: eb004c46 e10f9000 e229901a e319001f    FL........).....
 ```
 
-Utilisez la commande md pour lire la valeur binaire écrite avec les switches et écrivez-la sur les LEDs.
+Les différences entre ces commandes viennent de la taille des données lues en mémoire :
+
+- md.b (memory display - byte) : Affiche 1 octet
+- md.w (memory display - word) : Affiche 2 octets
+- md.l (memory display - long) : Affiche 4 octets
+
+
+**Utilisez la commande md pour lire la valeur binaire écrite avec les switches et écrivez-la sur les LEDs.**
 
 | Base Address | End Address | I/O Peripheral  |
 | ------------ | ----------- | --------------- |
@@ -184,16 +213,20 @@ ff200040: 03  .
 mw.b 0xFF200000 0x3 0x1
 ```	
 
-Qu'est-ce qui se passe si vous essayez d'accéder à une adresse qui n'est pas alignée (par exemple 0x01010101) et pourquoi ?
+**Qu'est-ce qui se passe si vous essayez d'accéder à une adresse qui n'est pas alignée (par exemple 0x01010101) et pourquoi ?**
 
 ```bash
 SOCFPGA_CYCLONE5 # md.b 0x01010101 0x1
 01010101: ea    .
 ```
 
+L'accès à une adresse non alignée (0x01010101) est possible, mais les données lues ne sont pas significatives. Les données lues sont arbitraires et dépendent de l'état de la mémoire à cet endroit.
+
+On peut le lire, car c'est une adresse mémoire valide, mais les données lues ne peuvent pas être interprétées sans connaissance du contexte.
+
 ## Exercice 2
 
-Écrivez un script (à l'aide d'une variable d'environnement) U-Boot qui va alterner, chaque seconde, entre afficher 🯰🯰🯰🯰🯰🯰 et 🯵🯵🯵🯵🯵🯵 sur les affichages à 7-segments.
+**Écrivez un script (à l'aide d'une variable d'environnement) U-Boot qui va alterner, chaque seconde, entre afficher 🯰🯰🯰🯰🯰🯰 et 🯵🯵🯵🯵🯵🯵 sur les affichages à 7-segments.**
 
 **Adresse des affichages à 7-segments**
 
@@ -235,33 +268,40 @@ ___
 
 # Accès aux périphériques du DE1-SoC depuis Linux
 
-Pouvez-vous identifier au moins deux gros problèmes de cette approche ?
+**Pouvez-vous identifier au moins deux gros problèmes de cette approche ?**
 
-
+L'accès direct aux périphériques matériels depuis l'espace utilisateur est dangereux et non recommandé. Cela peut entraîner des plantages du système, des fuites de mémoire, des corruptions de données et des problèmes de sécurité.
 
 ## Exercice 3
 
 Écrivez un logiciel user-space en C qui utilise /dev/mem pour accéder aux périphériques. Au démarrage, le logiciel commence par afficher A sur l’affichage HEX0. Ensuite, l’utilisateur peut contrôler la lettre affichée sur HEX0 de la façon suivante:
 
-En appuyant sur KEY0, le caractère actuellement affiché est décrémenté
-Z devient Y, ... , B devient A
-
-Si A est affiché, on recommence à Z
-
-En appuyant sur KEY1, le caractère actuellement affiché est incrémenté
-A devient B, ... , Y devient Z
-
-Si Z est déjà affiché, on recommence à A
+- En appuyant sur KEY0, le caractère actuellement affiché est décrémenté
+  - Z devient Y, ... , B devient A
+  - Si A est affiché, on recommence à Z
+- En appuyant sur KEY1, le caractère actuellement affiché est incrémenté
+  - A devient B, ... , Y devient Z
+  - Si Z est déjà affiché, on recommence à A
 
 De plus, le code ASCII de la lettre affichée doit être représenté en binaire sur les LEDs.
 
-Exemple: si A est affiché (soit 0x41 / 0b1000001 en ASCII), LED0 et LED6 doivent être allumée
+- Exemple: si A est affiché (soit 0x41 / 0b1000001 en ASCII), LED0 et LED6 doivent être allumée
 
-Note: vous pouvez trouver un exemple de police de caractère pour afficheurs 7-segments sur cette page Wikipedia. Libre à vous de vous en inspirer.
+**Note:** vous pouvez trouver un exemple de police de caractère pour afficheurs 7-segments sur cette page Wikipedia. Libre à vous de vous en inspirer.
 
-Bonus 1: éteignez les afficheurs 7-segments et les LEDs en partant (quand le programme est arrêté avec Ctrl+C) pour éviter de faire fondre la banquise inutilement.
+**Bonus 1:** éteignez les afficheurs 7-segments et les LEDs en partant (quand le programme est arrêté avec Ctrl+C) pour éviter de faire fondre la banquise inutilement.
 
+### Compilation <!-- omit in toc -->
 
+```bash
+arm-linux-gnueabihf-gcc-6.4.1 led_alpha.c -o led_alpha
+```	
+
+### Run <!-- omit in toc -->
+
+```bash
+~/drv/led_alpha
+```
 
 Quel est le souci principal dans l'écriture de ce logiciel ?
 

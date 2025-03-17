@@ -885,6 +885,7 @@ un driver.
     Pouvez-vous identifier au moins deux gros problèmes de cette approche ?
 
 .. admonition:: **Exercice 3**
+   :name: lab1-ex3
 
     Écrivez un logiciel user-space en C qui utilise :file:`/dev/mem` pour accéder aux périphériques.
     Au démarrage, le logiciel commence par afficher ``A`` sur l’affichage HEX0.
