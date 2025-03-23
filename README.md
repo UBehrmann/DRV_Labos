@@ -21,3 +21,17 @@ git fetch upstream
 git merge upstream/main
 git push origin main
 ```
+
+Connexion UART :
+
+```bash
+sudo picocom /dev/ttyUSB0 --b 115200
+´´´
+
+MDP : heig
+
+Connexion SSH :
+
+´´´bash
+ssh root@192.168.0.2
+´´´
