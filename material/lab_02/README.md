@@ -9,49 +9,43 @@
 # Table des matières <!-- omit in toc -->
 
 - [Téléchargement du noyau Linux et ajout des modules pour le User-space I/O (UIO)](#téléchargement-du-noyau-linux-et-ajout-des-modules-pour-le-user-space-io-uio)
-- [CONFIG\_UIO\_CIF is not set](#config_uio_cif-is-not-set)
-- [CONFIG\_UIO\_DMEM\_GENIRQ is not set](#config_uio_dmem_genirq-is-not-set)
-- [CONFIG\_UIO\_AEC is not set](#config_uio_aec-is-not-set)
-- [CONFIG\_UIO\_SERCOS3 is not set](#config_uio_sercos3-is-not-set)
-- [CONFIG\_UIO\_PCI\_GENERIC is not set](#config_uio_pci_generic-is-not-set)
-- [CONFIG\_UIO\_NETX is not set](#config_uio_netx-is-not-set)
-- [CONFIG\_UIO\_PRUSS is not set](#config_uio_pruss-is-not-set)
-- [CONFIG\_UIO\_MF624 is not set](#config_uio_mf624-is-not-set)
 - [Accès aux périphériques en utilisant /dev/mem](#accès-aux-périphériques-en-utilisant-devmem)
   - [Exercice 1](#exercice-1)
 - [Accès aux périphériques en utilisant le UIO framework](#accès-aux-périphériques-en-utilisant-le-uio-framework)
   - [Exercice 2](#exercice-2)
   - [Exercice 3](#exercice-3)
 - [UIO framework et interruptions](#uio-framework-et-interruptions)
+  - [Exercice 4](#exercice-4)
+  - [Exercice 5](#exercice-5)
 
 
 # Téléchargement du noyau Linux et ajout des modules pour le User-space I/O (UIO)
 
 Command a faire dans chaque terminal avant de compiler du code kernel 'manuellement'.
 
-´´´bash
+```bash
 export TOOLCHAIN=/opt/toolchains/arm-linux-gnueabihf_6.4.1/bin/arm-linux-gnueabihf-
-´´´
+```
 
 Configuration le noyau pour une nouvelle carte.
 
-´´´bash
+```bash
 make ARCH=arm CROSS_COMPILE=$TOOLCHAIN socfpga_defconfig
-´´´
+```
 
 **Pourquoi doit-on spécifier tous ces paramètres ?**
 
 Modifier la configuration avec:
 
-´´´bash
+```bash
 make ARCH=arm CROSS_COMPILE=$TOOLCHAIN menuconfig
-´´´
+```
 
 Modifier 'Userspace I/O platform driver with generic IRQ handling' pour la compilation en tant que module.
 
 Vérification de la configuration:
 
-´´´bash
+```bash
 $ grep UIO .config
 CONFIG_UIO=m
 # CONFIG_UIO_CIF is not set
@@ -63,11 +57,11 @@ CONFIG_UIO_PDRV_GENIRQ=m
 # CONFIG_UIO_NETX is not set
 # CONFIG_UIO_PRUSS is not set
 # CONFIG_UIO_MF624 is not set
-´´´
+```
 
 **Pouvez-vous expliquer les lignes ci-dessous ?**
 
-´´´bash	
+```bash	
 #include "socfpga_cyclone5.dtsi"
 #include <dt-bindings/interrupt-controller/irq.h>
 #include <dt-bindings/interrupt-controller/arm-gic.h>
@@ -86,25 +80,25 @@ CONFIG_UIO_PDRV_GENIRQ=m
     };
 
     (...)
-´´´
+```
 
 Compilation du noyau:
 
-´´´bash
+```bash
 make ARCH=arm CROSS_COMPILE=$TOOLCHAIN -j8
 rm ./tmp -rf
 make ARCH=arm CROSS_COMPILE=$TOOLCHAIN INSTALL_MOD_PATH="./tmp" modules_install
-´´´
+```
 
 Backup de l'ancien noyau/DT et copie des nouveaux fichiers:
 
-´´´bash
+```bash
 cp $HOME/tftpboot/socfpga.dtb $HOME/tftpboot/socfpga.dtb.old
 cp $HOME/tftpboot/zImage $HOME/tftpboot/zImage.old
 cp arch/arm/boot/dts/socfpga_cyclone5_sockit.dtb $HOME/tftpboot/socfpga.dtb
 cp arch/arm/boot/zImage $HOME/tftpboot/
 cp ./tmp/lib/modules/* /export/drv/ -R
-´´´
+```
 
 **Qu'est-ce que ces commandes font ? Est-il nécessaire de recompiler tout le noyau suite à nos changements ? Et si l'on modifie encore le Device Tree?**
 
@@ -120,9 +114,9 @@ ___
 
 Compilation :
 
-´´´bash
+```bash
 arm-linux-gnueabihf-gcc-6.4.1 ex1.c -o lab2ex1
-´´´
+```
 
 Mettre dans le répertoire '/export/drv/' et exécuter sur la carte.
 
@@ -158,14 +152,50 @@ Pas besoin de gérer les interruptions pour cet exercice.
 
 Cette commande doit être exécutée après chaque boot pour utiliser les UIO !
 
-´´´bash	
+```bash	
 modprobe -r uio_pdrv_genirq; modprobe uio_pdrv_genirq of_id="drv2025"
-´´´
+```
 
+Compilation :
+
+```bash
+arm-linux-gnueabihf-gcc-6.4.1 ex3.c -o lab2ex3
+```
+
+Mettre dans le répertoire '/export/drv/' et exécuter sur la carte.
+
+```bash
+~/drv/lab2ex3
+```
 
 ___
 
 # UIO framework et interruptions
 
+## Exercice 4
+
+**À l'aide du tutoriel disponible ici, améliorez le programme de l'exercice précédent (toujours en gardant une copie de celui-ci) afin de gérer l'appui sur les boutons au moyen d'interruptions.**
+
+Compilation :
+
+```bash
+arm-linux-gnueabihf-gcc-6.4.1 ex4.c -o lab2ex4
+```
+
+Mettre dans le répertoire '/export/drv/' et exécuter sur la carte.
+
+```bash
+~/drv/lab2ex4
+```
+
+## Exercice 5
+
+**Il y a au moins 3 façons pour attendre une interruption au moyen de /dev/uio0 (voir dans le tutoriel). Lesquelles ?**
+
+- read()
+- poll()
+- select()
+
+**Écrivez une version du logiciel user-space de l'exercice 4 pour chacune de ces façons et détaillez par écrit leurs différences/avantages/inconvénients.**
 
 

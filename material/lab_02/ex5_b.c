@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <unistd.h>
+#include <poll.h>
 
 // Adresse mémoire des périphériques (adapter si nécessaire)
 #define HW_BASE_ADDR 0xFF200000  // Base d'adresse des périphériques
@@ -12,14 +13,23 @@
 #define HEX4_5_OFFSET 0x30       // Offset HEX1
 #define LED_OFFSET 0x00          // Offset LEDs
 #define KEY_OFFSET 0x50          // Offset des boutons
+#define KEY_MASK_OFFSET 0x58     // Offset du masque des interruptions
+#define KEY_EDGE_OFFSET 0x5C     // Offset du registre d'interruptions
 
 // Registres des périphériques
 #define HEX0_3 *(volatile uint32_t *)(hw_base + HEX0_3_OFFSET)
 #define HEX4_5 *(volatile uint32_t *)(hw_base + HEX4_5_OFFSET)
 #define LEDS *(volatile uint32_t *)(hw_base + LED_OFFSET)
 #define KEYS *(volatile uint32_t *)(hw_base + KEY_OFFSET)
+#define KEY_MASK         *(volatile uint32_t *)(hw_base + KEY_MASK_OFFSET)
+#define KEY_EDGE         *(volatile uint32_t *)(hw_base + KEY_EDGE_OFFSET)
 
 #define SEG_TABLE_SIZE 27
+
+#define KEY_0 0x1
+#define KEY_1 0x2
+#define KEY_2 0x4
+#define KEY_3 0x8
 
 // Table de conversion ASCII vers 7-segments (A-Z)
 const unsigned char ascii_to_7seg[SEG_TABLE_SIZE] = {
@@ -55,13 +65,13 @@ const unsigned char ascii_to_7seg[SEG_TABLE_SIZE] = {
 // Macro pour obtenir le caractère à partir de l'index dans le texte
 #define CHAR_FROM_TEXT(x) ((text[x] == 0) ? ' ' : ('A' + text[x] - 1))
 
-static int mem_fd;
+static int uio_fd;
 static void *hw_base;
 
 // Texte édité (initialement vide)
 static unsigned text[6] = {0, 0, 0, 0, 0, 0};
 
-// Curseur d'édition (commence à HEX0)
+// Curseur d'édition (commence à HEX5)
 static int cursor_position = 0;
 
 // Fonction pour désactiver les affichages et LEDs avant de quitter
@@ -75,7 +85,7 @@ static void cleanup(int signum) {
 
     // Libérer la mémoire et fermer /dev/mem
     munmap(hw_base, getpagesize());
-    close(mem_fd);
+    close(uio_fd);
 
     exit(0);
 }
@@ -106,21 +116,25 @@ static void update_display() {
 }
 
 int main() {
-    // Ouvrir /dev/mem
-    mem_fd = open("/dev/mem", O_RDWR | O_SYNC);
-    if (mem_fd < 0) {
-        perror("Erreur lors de l'ouverture de /dev/mem");
+
+    // Ouvrir uio0
+    uio_fd = open("/dev/uio0", O_RDWR);
+    if (uio_fd < 0) {
+        perror("Erreur lors de l'ouverture de /dev/uio0");
+        exit(EXIT_FAILURE);
+    }
+
+    // Mapper la mémoire des périphériques (offset = 0 pour UIO)
+    hw_base =
+        mmap(NULL, getpagesize(), PROT_READ | PROT_WRITE, MAP_SHARED, uio_fd, 0);
+    if (hw_base == MAP_FAILED) {
+        perror("Erreur lors du mappage mémoire");
+        close(uio_fd);
         return 1;
     }
 
-    // Mapper la mémoire des périphériques
-    hw_base = mmap(NULL, getpagesize(), PROT_READ | PROT_WRITE, MAP_SHARED, mem_fd,
-                   HW_BASE_ADDR);
-    if (hw_base == MAP_FAILED) {
-        perror("Erreur lors du mappage mémoire");
-        close(mem_fd);
-        return 1;
-    }
+    // Active les interruptions pour les boutons
+    KEY_MASK = 0xF;
 
     // Capture du signal pour un arrêt propre
     signal(SIGINT, cleanup);
@@ -129,48 +143,54 @@ int main() {
     update_display();
 
     while (1) {
-        usleep(10000);  // 10ms
+        uint32_t info = 1;  // Unmask interrupts
 
-        unsigned int key_status = KEYS;
-
-        if (key_status & 0x1) {  // KEY0 appuyé
-
-            if(text[cursor_position] != 0) {
-                text[cursor_position]--;
-            }
-            
-            update_display();
-            usleep(300000);  // Debounce
+        // Activer les interruptions
+        ssize_t nb = write(uio_fd, &info, sizeof(info));
+        if (nb != (ssize_t)sizeof(info)) {
+            perror("Erreur lors de l'écriture dans uio_fd");
+            close(uio_fd);
+            exit(EXIT_FAILURE);
         }
 
-        if (key_status & 0x2) {  // KEY1 appuyé
+        // Configurer poll pour attendre une interruption
+        struct pollfd fds;
+        fds.fd = uio_fd;
+        fds.events = POLLIN;
 
-            if(text[cursor_position] != SEG_TABLE_SIZE - 1) {
-                text[cursor_position]++;
+        int ret = poll(&fds, 1, -1);  // Attendre indéfiniment
+        if (ret > 0 && (fds.revents & POLLIN)) {
+            unsigned int key_status = KEY_EDGE;
+
+            if (key_status & KEY_0) {  // KEY0 appuyé
+                if (text[cursor_position] != 0) text[cursor_position]--;
+                update_display();
             }
 
-            update_display();
-            usleep(300000);  // Debounce
-        }
-
-        if (key_status & 0x4) {  // KEY2 appuyé
-            if(cursor_position < 5) {
-                cursor_position++;
-            }
-            
-            update_display();
-            usleep(300000);  // Debounce
-        }
-
-        if (key_status & 0x8) {  // KEY3 appuyé
-
-            if(cursor_position > 0) {
-                cursor_position--;
+            if (key_status & KEY_1) {  // KEY1 appuyé
+                if (text[cursor_position] != SEG_TABLE_SIZE - 1)
+                    text[cursor_position]++;
+                update_display();
             }
 
-            update_display();
-            usleep(300000);  // Debounce
+            if (key_status & KEY_2) {  // KEY2 appuyé
+                if (cursor_position < 5) cursor_position++;
+                update_display();
+            }
+
+            if (key_status & KEY_3) {  // KEY3 appuyé
+                if (cursor_position > 0) cursor_position--;
+                update_display();
+            }
+
+        } else if (ret < 0) {
+            perror("Erreur lors de l'appel à poll");
+            close(uio_fd);
+            exit(EXIT_FAILURE);
         }
+
+        // Clear l'interruptions
+        KEY_EDGE = 0xF;  
     }
 
     // Cleanup (inatteignable, mais pour la forme)

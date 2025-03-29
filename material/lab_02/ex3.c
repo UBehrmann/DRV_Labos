@@ -13,8 +13,6 @@
 #define LED_OFFSET 0x00          // Offset LEDs
 #define KEY_OFFSET 0x50          // Offset des boutons
 
-#define MAP_SIZE 4096UL
-
 // Registres des périphériques
 #define HEX0_3 *(volatile uint32_t *)(hw_base + HEX0_3_OFFSET)
 #define HEX4_5 *(volatile uint32_t *)(hw_base + HEX4_5_OFFSET)
@@ -57,19 +55,17 @@ const unsigned char ascii_to_7seg[SEG_TABLE_SIZE] = {
 // Macro pour obtenir le caractère à partir de l'index dans le texte
 #define CHAR_FROM_TEXT(x) ((text[x] == 0) ? ' ' : ('A' + text[x] - 1))
 
-// Pointeurs de registre
-volatile unsigned int *hex0, *leds, *keys;
-int uio_fd;
-void *hw_base;
+static int uio_fd;
+static void *hw_base;
 
 // Texte édité (initialement vide)
-unsigned text[6] = {0, 0, 0, 0, 0, 0};
+static unsigned text[6] = {0, 0, 0, 0, 0, 0};
 
 // Curseur d'édition (commence à HEX0)
-int cursor_position = 0;
+static int cursor_position = 0;
 
 // Fonction pour désactiver les affichages et LEDs avant de quitter
-void cleanup(int signum) {
+static void cleanup(int signum) {
     printf("\nArrêt du programme... Extinction des LEDs et de l'affichage.\n");
 
     // Éteindre les afficheurs 7-segments et LEDs
@@ -78,14 +74,14 @@ void cleanup(int signum) {
     LEDS = 0x00;
 
     // Libérer la mémoire et fermer /dev/mem
-    munmap(hw_base, MAP_SIZE);
+    munmap(hw_base, getpagesize());
     close(uio_fd);
 
     exit(0);
 }
 
 // Met à jour l'affichage HEX0-HEX5 et les LEDs
-void update_display() {
+static void update_display() {
     // Hex0-3
     for (int i = 0; i < 4; i++) {
         unsigned char seg_value =
@@ -118,7 +114,7 @@ int main() {
     }
 
     // Mapper la mémoire des périphériques (offset = 0 pour UIO)
-    hw_base = mmap(NULL, MAP_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, uio_fd, 0);
+    hw_base = mmap(NULL, getpagesize(), PROT_READ | PROT_WRITE, MAP_SHARED, uio_fd, 0);
     if (hw_base == MAP_FAILED) {
         perror("Erreur lors du mappage mémoire");
         close(uio_fd);
