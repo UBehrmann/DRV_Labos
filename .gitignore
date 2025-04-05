@@ -2,3 +2,13 @@
 !/**/
 !*.*
 !.gitignore
+
+# Ignore all generated files
+*.cmd
+*.ko
+*.mod
+*.mod.c
+*.mod.o
+*.o
+*.symvers
+*.order

@@ -4,8 +4,9 @@
 #include <linux/fs.h>		/* Needed for file_operations */
 #include <linux/slab.h>	/* Needed for kmalloc */
 #include <linux/uaccess.h>	/* copy_(to|from)_user */
-
 #include <linux/string.h>
+#include <linux/cdev.h>      /* Needed for cdev utilities */
+#include <linux/device.h>    /* Needed for device creation */
 
 #include "accumulate.h"
 
@@ -17,48 +18,39 @@
 static uint64_t accumulate_value;
 static int operation = OP_ADD;
 
+static dev_t dev_number;      /* Device number (major + minor) */
+static struct cdev accumulate_cdev; /* Character device structure */
+static struct class *accumulate_class; /* Device class */
+
 static ssize_t accumulate_read(struct file *filp, char __user *buf,
 			       size_t count, loff_t *ppos)
 {
-	char buffer[21] = { 0 }; /* UINT64_MAX has 20 digits */
-	size_t to_copy = count;
-	int nb_char;
+	size_t to_copy;
 
-	if (buf == NULL || count == 0) {
-		return 0;
+	to_copy = min(count, sizeof(accumulate_value));
+
+	if (copy_to_user(buf, &accumulate_value, to_copy)) {
+		return -EFAULT;
 	}
 
-	nb_char = snprintf(buffer, sizeof(buffer), "%lld", accumulate_value);
+	/* Reset file position to allow multiple reads */
+	*ppos = 0;
 
-	if (*ppos >= nb_char) {
-		return 0;
-	}
-
-	to_copy = nb_char > count ? count : nb_char;
-
-	copy_to_user(buf, buffer, to_copy);
-
-	*ppos = nb_char;
-
-	return nb_char;
+	return to_copy;
 }
 
 static ssize_t accumulate_write(struct file *filp, const char __user *buf,
 				size_t count, loff_t *ppos)
 {
-	char buffer[21] = { 0 }; /* UINT64_MAX has 20 digits */
 	uint64_t value;
 
-	if (count == 0) {
-		return 0;
-	} else if (count > sizeof(buffer)) {
+	if (count < sizeof(value)) {
 		return -EINVAL;
 	}
 
-	*ppos = 0;
-
-	copy_from_user(buffer, buf, count);
-	kstrtoull(buffer, 10, &value);
+	if (copy_from_user(&value, buf, sizeof(value))) {
+		return -EFAULT;
+	}
 
 	switch (operation) {
 	case OP_ADD:
@@ -70,10 +62,10 @@ static ssize_t accumulate_write(struct file *filp, const char __user *buf,
 		break;
 
 	default:
-		break;
+		return -EINVAL;
 	}
 
-	return count;
+	return sizeof(value);
 }
 
 static long accumulate_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
@@ -105,11 +97,47 @@ static const struct file_operations accumulate_fops = {
 
 static int __init accumulate_init(void)
 {
-	register_chrdev(MAJOR_NUM, DEVICE_NAME, &accumulate_fops);
+	int ret;
+
+	/* Allocate device number dynamically */
+	ret = alloc_chrdev_region(&dev_number, 0, 1, DEVICE_NAME);
+	if (ret < 0) {
+		pr_err("Failed to allocate device number\n");
+		return ret;
+	}
+
+	/* Initialize and add the character device */
+	cdev_init(&accumulate_cdev, &accumulate_fops);
+	accumulate_cdev.owner = THIS_MODULE;
+	ret = cdev_add(&accumulate_cdev, dev_number, 1);
+	if (ret < 0) {
+		pr_err("Failed to add cdev\n");
+		unregister_chrdev_region(dev_number, 1);
+		return ret;
+	}
+
+	/* Create device class */
+	accumulate_class = class_create(THIS_MODULE, DEVICE_NAME);
+	if (IS_ERR(accumulate_class)) {
+		pr_err("Failed to create class\n");
+		cdev_del(&accumulate_cdev);
+		unregister_chrdev_region(dev_number, 1);
+		return PTR_ERR(accumulate_class);
+	}
+
+	/* Create device file */
+	if (device_create(accumulate_class, NULL, dev_number, NULL, DEVICE_NAME) == NULL) {
+		pr_err("Failed to create device\n");
+		class_destroy(accumulate_class);
+		cdev_del(&accumulate_cdev);
+		unregister_chrdev_region(dev_number, 1);
+		return -1;
+	}
 
 	accumulate_value = 0;
 
-	pr_info("Acumulate ready!\n");
+	pr_info("Accumulate ready!\n");
+	pr_info("Device created at /dev/%s\n", DEVICE_NAME);
 	pr_info("ioctl ACCUMULATE_CMD_RESET: %lu\n", (unsigned long)ACCUMULATE_CMD_RESET);
 	pr_info("ioctl ACCUMULATE_CMD_CHANGE_OP: %lu\n", (unsigned long)ACCUMULATE_CMD_CHANGE_OP);
 
@@ -118,9 +146,19 @@ static int __init accumulate_init(void)
 
 static void __exit accumulate_exit(void)
 {
-	unregister_chrdev(MAJOR_NUM, DEVICE_NAME);
+	/* Remove device file */
+	device_destroy(accumulate_class, dev_number);
 
-	pr_info("Acumulate done!\n");
+	/* Destroy device class */
+	class_destroy(accumulate_class);
+
+	/* Remove character device */
+	cdev_del(&accumulate_cdev);
+
+	/* Free device number */
+	unregister_chrdev_region(dev_number, 1);
+
+	pr_info("Accumulate done!\n");
 }
 
 MODULE_AUTHOR("REDS");
