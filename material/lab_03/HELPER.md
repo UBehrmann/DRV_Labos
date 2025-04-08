@@ -261,7 +261,13 @@ sudo dmesg | tail
 Compilez le programme 'test_accumulate.c' et exécutez-le:
 
 ```bash
-gcc -o test_accumulate test_accumulate.c -Wall
+arm-linux-gnueabihf-gcc-6.4.1 test_accumulate.c -o test_accumulate -Wall
+```
+
+Mettre dans le répertoire '/export/drv/' et exécuter sur la carte.
+
+```bash
+~/drv/test_accumulate
 ```
 
 </div>

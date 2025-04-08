@@ -5,3 +5,4 @@ all:
 	make -C $(KERNELSRC) M=$(PWD) modules
 clean:
 	make -C $(KERNELSRC) M=$(PWD) clean
+
