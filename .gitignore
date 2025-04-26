@@ -12,3 +12,4 @@
 *.o
 *.symvers
 *.order
+*.o.rc
