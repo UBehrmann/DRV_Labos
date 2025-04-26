@@ -9,6 +9,7 @@
 # Table des matières <!-- omit in toc -->
 
 - [Exercice 1 : read/write et allocation dynamique](#exercice-1--readwrite-et-allocation-dynamique)
+- [Exercice 2 : Exercice 2 : Interrupt et platform drivers](#exercice-2--exercice-2--interrupt-et-platform-drivers)
 
 # Exercice 1 : read/write et allocation dynamique
 
@@ -64,5 +65,30 @@ Read data are:
 All data were correct
     
 ```
+
+# Exercice 2 : Exercice 2 : Interrupt et platform drivers
+
+Compilation :
+
+```bash
+make
+```
+
+Montez le module:
+
+```bash
+sudo insmod ~/drv/switch_copy.ko
+```
+
+```bash
+lsmod | grep switch_copy
+```
+
+Démontez le module:
+
+```bash
+sudo rmmod switch_copy
+```
+
 
 </div>
