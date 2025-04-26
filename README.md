@@ -18,7 +18,7 @@ Fork du projet [drv25_student](https://reds-gitlab.heig-vd.ch/reds-public/drv25_
 
 ```bash
 git fetch upstream
-git merge upstream/main
+git merge upstream/main -Xtheirs
 git push origin main
 ```
 

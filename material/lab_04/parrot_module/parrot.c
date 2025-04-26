@@ -18,8 +18,14 @@
 #define MAJMIN MKDEV(MAJOR_NUM, 0)
 #define DEVICE_NAME "parrot"
 
+#define INITIAL_CAPACITY 8
+#define MAX_CAPACITY 1024
+
 static struct cdev cdev;
 static struct class *cl;
+static char *buffer;
+static size_t buffer_size = 0; // Number of bytes written to the buffer
+static size_t buffer_capacity = INITIAL_CAPACITY;
 
 /**
  * @brief Read back previously written data in the internal buffer.
@@ -36,7 +42,17 @@ static struct class *cl;
 static ssize_t parrot_read(struct file *filp, char __user *buf, size_t count,
 			   loff_t *ppos)
 {
-	return 0;
+	if (*ppos >= buffer_size) // No more data to read
+		return 0;
+
+	if (*ppos + count > buffer_size) // Adjust count to available data
+		count = buffer_size - *ppos;
+
+	if (copy_to_user(buf, buffer + *ppos, count))
+		return -EFAULT;
+
+	*ppos += count;
+	return count;
 }
 
 /**
@@ -54,7 +70,41 @@ static ssize_t parrot_read(struct file *filp, char __user *buf, size_t count,
 static ssize_t parrot_write(struct file *filp, const char __user *buf,
 			    size_t count, loff_t *ppos)
 {
-	return 0;
+	size_t new_size;
+	char *new_buffer; // Moved declaration to the beginning of the block
+
+	if (*ppos >= MAX_CAPACITY) // Writing beyond max capacity
+		return -EFBIG;
+
+	if (*ppos + count > MAX_CAPACITY) // Adjust count to fit max capacity
+		count = MAX_CAPACITY - *ppos;
+
+	new_size = *ppos + count;
+	if (new_size > buffer_capacity) {
+		size_t new_capacity = buffer_capacity;
+
+		while (new_capacity < new_size && new_capacity < MAX_CAPACITY)
+			new_capacity *= 2;
+
+		if (new_capacity > MAX_CAPACITY)
+			new_capacity = MAX_CAPACITY;
+
+		new_buffer = krealloc(buffer, new_capacity, GFP_KERNEL); // Use the declared variable
+		if (!new_buffer)
+			return -ENOMEM;
+
+		buffer = new_buffer;
+		buffer_capacity = new_capacity;
+	}
+
+	if (copy_from_user(buffer + *ppos, buf, count))
+		return -EFAULT;
+
+	*ppos += count;
+	if (new_size > buffer_size)
+		buffer_size = new_size;
+
+	return count;
 }
 
 /**
@@ -111,6 +161,15 @@ static int __init parrot_init(void)
 		goto err_cdev_add;
 	}
 
+	buffer = kmalloc(INITIAL_CAPACITY, GFP_KERNEL);
+	if (!buffer) {
+		pr_err("Parrot: Failed to allocate initial buffer\n");
+		return -ENOMEM;
+	}
+
+	buffer_size = 0;
+	buffer_capacity = INITIAL_CAPACITY;
+
 	pr_info("Parrot ready!\n");
 
 	return 0;
@@ -121,7 +180,7 @@ err_device_create:
 	class_destroy(cl);
 err_class_create:
 	unregister_chrdev_region(MAJMIN, 1);
-
+	kfree(buffer);
 	return err;
 
 }
@@ -133,6 +192,7 @@ static void __exit parrot_exit(void)
 	device_destroy(cl, MAJMIN);
 	class_destroy(cl);
 	unregister_chrdev_region(MAJMIN, 1);
+	kfree(buffer);
 
 	pr_info("Parrot done!\n");
 }
