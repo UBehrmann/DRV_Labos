@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Critère d&#39;évaluation &#8212; Documentation DRV 2025 </title>
+    <title>Tutoriel 3 --- REDS-adder driver v2.1 et v3.1 &#8212; Documentation DRV 2025 </title>
   
   
   
@@ -45,11 +45,11 @@
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
     <script src="../_static/translations.js?v=bf059b8c"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'helper/eval_criterion';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tuto_03/tuto_03';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Recherche" href="../search.html" />
-    <link rel="next" title="Laboratoire 0 --- Consolidation du langage C" href="../lab_00/lab_00.html" />
-    <link rel="prev" title="Helper" href="helper.html" />
+    <link rel="next" title="Laboratoire 5 --- Développement de drivers kernel-space II" href="../lab_05/lab_05.html" />
+    <link rel="prev" title="Laboratoire 4 --- Développement de drivers kernel-space I" href="../lab_04/lab_04.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="fr"/>
   <meta name="docsearch:version" content="" />
@@ -146,17 +146,17 @@
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="helper.html">Helper</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Consigne de rendu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../helper/helper.html">Helper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../helper/eval_criterion.html">Consigne de rendu</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../lab_00/lab_00.html">Laboratoire 0</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../lab_01/lab_01.html">Laboratoire 1</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ssh.html">Mise en place SSH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../helper/ssh.html">Mise en place SSH</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tuto_01/tuto_01.html">Tuto 1</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../lab_02/lab_02.html">Laboratoire 2</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tuto_02/tuto_02.html">Tuto 2</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../lab_03/lab_03.html">Laboratoire 3</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../lab_04/lab_04.html">Laboratoire 4</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tuto_03/tuto_03.html">Tuto 3</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Tuto 3</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../lab_05/lab_05.html">Laboratoire 5</a></li>
 </ul>
 
@@ -217,7 +217,7 @@
       
       
       
-      <li><a href="../_sources/helper/eval_criterion.rst" target="_blank"
+      <li><a href="../_sources/tuto_03/tuto_03.rst" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Télécharger le fichier source"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -291,7 +291,7 @@
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Critère d'évaluation</h1>
+    <h1>Tutoriel 3 ---  REDS-adder driver v2.1 et v3.1</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -305,78 +305,39 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="critere-d-evaluation">
-<span id="eval-criterion"></span><h1>Critère d'évaluation<a class="headerlink" href="#critere-d-evaluation" title="Lien vers cette rubrique">#</a></h1>
-<p>Certains laboratoires seront évalués. Pour cela, seuls les exercices (bloc bleu) doivent
-impérativement être faits. Les blocs verts sont principalement des informations complémentaires
-ou sources de réflexion, il n'y a aucune obligation d'y répondre et ne seront pas pris en compte dans les évaluations.</p>
-<p>Les exercices seront évalués selon les critères suivants :</p>
-<p>S'il est demandé d'écrire du code, ce code doit se trouver dans un fichier <em>ex&lt;n&gt;.c</em>, où &lt;n&gt; correspond au numéro de l'exercice.
-Si un exercice contient plusieurs variantes, alors le fichier sera nommé <em>ex&lt;n&gt;_&lt;variante&gt;.c</em>, où &lt;variante&gt; correspond à la variante.
-Par exemple : <em>ex2.c</em>, <em>ex6_poll.c</em>.
-Il n'est pas nécessaire de renommer les fichiers déjà existants.
-Si un exercice réutilise un fichier précédent, celui-ci doit être dupliqué pour le nouvel exercice, sauf indication contraire.</p>
-<p>Si le code a pour but d'être exécuté sur la DE1-SoC, il doit être compilé en &quot;compilation croisée&quot;,
-c.-à-d. en utilisant la toolchain mentionnée dans le <a class="reference internal" href="../lab_01/lab_01.html#laboratoire1"><span class="std std-ref">Laboratoire 1 --- Introduction</span></a>.</p>
-<p>N'oubliez pas de mettre votre prénom et nom !</p>
-<p>Les exercices sont à faire <strong>individuellement</strong>.
-Copier la solution d'un autre et changer le nom/l'ordre des variables n'est pas toléré.</p>
-<p>La date limite est celle communiquée dans l'annonce sur Moodle.
-Vous devez rendre une archive <code class="file docutils literal notranslate"><span class="pre">.tar.gz</span></code> contenant :</p>
+  <section id="tutoriel-3-reds-adder-driver-v2-1-et-v3-1">
+<span id="tutoriel3"></span><h1>Tutoriel 3 ---  REDS-adder driver v2.1 et v3.1<a class="headerlink" href="#tutoriel-3-reds-adder-driver-v2-1-et-v3-1" title="Lien vers cette rubrique">#</a></h1>
+<figure class="align-right">
+<a class="reference internal image-reference" href="../_images/logo_drv.png"><img alt="../_images/logo_drv.png" src="../_images/logo_drv.png" style="width: 6cm;" /></a>
+</figure>
+<p>Dans ce tutoriel, on explorera davantage de possibilités offertes par le Linux
+Device Model pour améliorer notre driver.</p>
+<p>Les fichiers de ce tutoriel se trouvent dans le dépôt git.</p>
+<p><strong>sysfs</strong> nous permet d'exposer à l'utilisateur une série de propriétés, afin
+de pouvoir aisément configurer et interagir avec notre dispositif.
+Dans le contexte de notre driver, on utilisera sysfs pour :</p>
 <ul class="simple">
-<li><p>le code source de vos solutions et tous les fichiers nécessaires,</p></li>
-<li><dl class="simple">
-<dt>un fichier <code class="file docutils literal notranslate"><span class="pre">README.md</span></code></dt><dd><ul>
-<li><p>contenant les réponses aux questions posées dans les exercices.</p></li>
-<li><p>les éventuels soucis rencontrés qui péjore le rendu</p></li>
-<li><p>les choix d'implémentation &quot;spéciaux&quot; (si trop long pour expliquer en commentaire)</p></li>
+<li><p>voir la taille maximale de la chaîne de caractères à chiffrer;</p></li>
+<li><p>voir et modifier le seuil utilisé pour le chiffrement;</p></li>
+<li><p>voir et modifier l'opération effectuée par le dispositif (chiffrement ou
+déchiffrement).</p></li>
 </ul>
-</dd>
-</dl>
-</li>
-</ul>
-<p>Les notes seront réparties comme suit :</p>
-<ul class="simple">
-<li><p>80% de la note si l'exercice est correct (c.-à-d., <em>&quot;fonctionne&quot;</em>).
-Il doit bien sûr &quot;fonctionner&quot; sur d'autres PCs que votre PC personnel, et de façon déterministe.
-Il est donc impératif que tout ce qui est nécessaire pour compiler et tester le fonctionnement de la solution soit rendu.</p></li>
-<li><p>20% de la note si l'exercice est &quot;bien fait&quot;, c.-à-d. :</p>
-<ul>
-<li><p>Respect des <a class="reference external" href="https://www.kernel.org/doc/html/latest/process/coding-style.html">Linux kernel coding style</a>,
-particulièrement les points suivants :</p>
-<ul>
-<li><ol class="arabic simple">
-<li><p>Indentation</p></li>
-</ol>
-</li>
-<li><ol class="arabic simple" start="2">
-<li><p>Breaking long lines and strings</p></li>
-</ol>
-</li>
-<li><ol class="arabic simple" start="3">
-<li><p>Placing Braces and Spaces</p></li>
-</ol>
-</li>
-<li><ol class="arabic simple" start="4">
-<li><p>Naming</p></li>
-</ol>
-</li>
-<li><ol class="arabic simple" start="6">
-<li><p>Functions</p></li>
-</ol>
-</li>
-<li><ol class="arabic simple" start="8">
-<li><p>Commenting</p></li>
-</ol>
-</li>
-</ul>
-</li>
-<li><p><strong>code lisible</strong></p></li>
-<li><p><strong>documenté/commenté</strong></p></li>
-<li><p><strong>bien structuré</strong></p></li>
-</ul>
-</li>
-</ul>
+<p>Le driver v2.1 est identique à la version 1.1, sauf qu'une entrée dans sysfs a
+été ajoutée --- n'hésitez pas à comparer les deux versions du driver à l'aide
+d'un outil tel que <a class="reference external" href="https://meldmerge.org/">meld</a>, cela vous montrera comment
+vous pouvez ajouter des fichiers dans sysfs.</p>
+<p>Pouvoir changer ces propriétés à la volée introduit des problèmes potentiels : par
+exemple, qu'est-ce qui va se passer si l'on modifie l'opération effectuée pendant
+qu'elle est en cours ?
+Pour éviter ces situations, une primitive de synchronisation (mutex) a été
+introduite.</p>
+<p>De plus, afin de mieux pouvoir gérer les données stockées dans notre driver, le
+vecteur qu'on avait utilisé dans le tutoriel 2 a été remplacé par une KFIFO.</p>
+<p>Le driver v3.1 est donc une version bien plus complète du driver pour notre
+dispositif.
+Essayez de comprendre ses mécanismes de fonctionnement et cherchez à
+l'améliorer en rajoutant des fonctionnalités et en optimisant ses opérations.</p>
+<p><em>Have fun</em> et, bien sûr, on est à votre disposition pour toute question éventuelle ! :-)</p>
 </section>
 
 
@@ -391,20 +352,20 @@ particulièrement les points suivants :</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="helper.html"
+       href="../lab_04/lab_04.html"
        title="page précédente">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">précédent</p>
-        <p class="prev-next-title">Helper</p>
+        <p class="prev-next-title">Laboratoire 4 --- Développement de drivers kernel-space I</p>
       </div>
     </a>
     <a class="right-next"
-       href="../lab_00/lab_00.html"
+       href="../lab_05/lab_05.html"
        title="page suivante">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">suivant</p>
-        <p class="prev-next-title">Laboratoire 0 --- Consolidation du langage C</p>
+        <p class="prev-next-title">Laboratoire 5 --- Développement de drivers kernel-space II</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
