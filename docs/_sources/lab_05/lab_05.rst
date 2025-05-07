@@ -294,7 +294,7 @@ Voici un exemple d'utilisation :
 			int rc;
 			struct priv *priv = dev_get_drvdata(dev);
 
-			rc = sysfs_emit(buf, 8, "%d\n", priv->my_internal_variable);
+			rc = sysfs_emit(buf, "%d\n", priv->my_internal_variable);
 
 			return rc;
 		}
