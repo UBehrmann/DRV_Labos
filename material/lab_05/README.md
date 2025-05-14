@@ -12,6 +12,8 @@
 - [Exercice 2 : ktimer](#exercice-2--ktimer)
 - [Exercice 3](#exercice-3)
 
+___
+
 # Exercice 1 : kfifo et kthread
 
 Pour la 'kfifo', j'ai ajouté un verrouillage comme indiqué pour éviter les problèmes avec les accès concurrents.
@@ -23,6 +25,8 @@ echo "up" > /dev/lab5ex1
 echo "down" > /dev/lab5ex1
 ```
 
+___
+
 
 # Exercice 2 : ktimer
 
@@ -33,8 +37,41 @@ echo "up" > /dev/lab5ex2
 echo "down" > /dev/lab5ex2
 ```
 
+___
+
 # Exercice 3
 
+## Utilisez le 'sysfs'
 
+### Pour récupérer et modifier intervalle entre l'allumage et l'extinction de la LED:
+
+```bash
+cat /sys/devices/platform/soc/ff200000.drv2025/interval_ms
+echo 200 > /sys/devices/platform/soc/ff200000.drv2025/interval_ms
+```
+
+### Pour récupérer le numéro de la LED actuellement allumée:
+
+```bash
+cat /sys/devices/platform/soc/ff200000.drv2025/led_current
+```
+
+### Pour récupérer le nombre de séquences jouées:
+
+```bash
+cat /sys/devices/platform/soc/ff200000.drv2025/seq_count
+```
+
+### Pour récupérer le nombre de séquences restantes dans la FIFO:
+
+```bash
+cat /sys/devices/platform/soc/ff200000.drv2025/kfifo_count
+```
+
+### Pour récupérer la séquence restante dans la FIFO:
+
+```bash
+cat /sys/devices/platform/soc/ff200000.drv2025/sequence
+```
 
 </div>

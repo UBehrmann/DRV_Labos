@@ -9,24 +9,32 @@
 # Table des matières <!-- omit in toc -->
 
 - [Exercice 1 : kfifo et kthread](#exercice-1--kfifo-et-kthread)
+  - [Compilation :](#compilation-)
+  - [Montez le module:](#montez-le-module)
+  - [Utilisez le fichier `/dev/lab5ex2` pour envoyer les commandes "up" et "down".](#utilisez-le-fichier-devlab5ex2-pour-envoyer-les-commandes-up-et-down)
+  - [Démontez le module:](#démontez-le-module)
 - [Exercice 2 : ktimer](#exercice-2--ktimer)
+  - [Montez le module:](#montez-le-module-1)
+  - [Utilisez le fichier `/dev/lab5ex2` pour envoyer les commandes "up" et "down".](#utilisez-le-fichier-devlab5ex2-pour-envoyer-les-commandes-up-et-down-1)
+  - [Démontez le module:](#démontez-le-module-1)
+- [Exercice 3 : sysfs](#exercice-3--sysfs)
+  - [Montez le module:](#montez-le-module-2)
+  - [Utilisez le fichier `/dev/lab5ex3` pour envoyer les commandes "up" et "down".](#utilisez-le-fichier-devlab5ex3-pour-envoyer-les-commandes-up-et-down)
+  - [Utilisez le 'sysfs'](#utilisez-le-sysfs)
+    - [Pour changer l'interval entre l'allumage et l'extinction de la LED:](#pour-changer-linterval-entre-lallumage-et-lextinction-de-la-led)
+  - [Démontez le module:](#démontez-le-module-2)
+
+___
 
 # Exercice 1 : kfifo et kthread
 
-Compilation :
-
-```bash
-export TOOLCHAIN=/opt/toolchains/arm-linux-gnueabihf_6.4.1/bin/arm-linux-gnueabihf-
-```
+## Compilation :
 
 ```bash
 make
 ```
 
-arm-linux-gnueabihf-gcc-6.4.1 lab5ex1.c -o lab5ex1
-
-
-Montez le module:
+## Montez le module:
 
 ```bash
 sudo insmod ~/drv/lab5ex1.ko
@@ -35,22 +43,24 @@ sudo insmod ~/drv/lab5ex1.ko
 ```bash
 lsmod | grep lab5ex1
 ```
+## Utilisez le fichier `/dev/lab5ex2` pour envoyer les commandes "up" et "down".
 
+```bash
 echo "up" > /dev/lab5ex1
 echo "down" > /dev/lab5ex1
+```
 
-sudo dmesg | tail
-
-
-Démontez le module:
+## Démontez le module:
 
 ```bash
 sudo rmmod lab5ex1
 ```
 
+___
+
 # Exercice 2 : ktimer
 
-Montez le module:
+## Montez le module:
 
 ```bash
 sudo insmod ~/drv/lab5ex2.ko
@@ -60,16 +70,76 @@ sudo insmod ~/drv/lab5ex2.ko
 lsmod | grep lab5ex2
 ```
 
+## Utilisez le fichier `/dev/lab5ex2` pour envoyer les commandes "up" et "down".
+
+```bash
 echo "up" > /dev/lab5ex2
 echo "down" > /dev/lab5ex2
+```
 
-sudo dmesg | tail
-
-
-Démontez le module:
+## Démontez le module:
 
 ```bash
 sudo rmmod lab5ex2
 ```
+
+___
+
+# Exercice 3 : sysfs
+
+## Montez le module:
+
+```bash
+sudo insmod ~/drv/lab5ex3.ko
+```
+
+```bash
+lsmod | grep lab5ex3
+```
+
+## Utilisez le fichier `/dev/lab5ex3` pour envoyer les commandes "up" et "down".
+
+```bash
+echo "up" > /dev/lab5ex3
+echo "down" > /dev/lab5ex3
+```
+
+## Utilisez le 'sysfs'
+
+### Pour récupérer et modifier intervalle entre l'allumage et l'extinction de la LED:
+
+```bash
+cat /sys/devices/platform/soc/ff200000.drv2025/interval_ms
+echo 200 > /sys/devices/platform/soc/ff200000.drv2025/interval_ms
+```
+
+### Pour récupérer le numéro de la LED actuellement allumée:
+
+```bash
+cat /sys/devices/platform/soc/ff200000.drv2025/led_current
+```
+
+### Pour récupérer le nombre de séquences jouées:
+
+```bash
+cat /sys/devices/platform/soc/ff200000.drv2025/seq_count
+```
+
+### Pour récupérer le nombre de séquences restantes dans la FIFO:
+
+```bash
+cat /sys/devices/platform/soc/ff200000.drv2025/kfifo_count
+```
+
+### Pour récupérer la séquence restante dans la FIFO:
+
+```bash
+cat /sys/devices/platform/soc/ff200000.drv2025/sequence
+```
+
+## Démontez le module:
+
+```bash
+sudo rmmod lab
 
 </div>
