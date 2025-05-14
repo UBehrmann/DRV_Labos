@@ -21,8 +21,16 @@
   - [Montez le module:](#montez-le-module-2)
   - [Utilisez le fichier `/dev/lab5ex3` pour envoyer les commandes "up" et "down".](#utilisez-le-fichier-devlab5ex3-pour-envoyer-les-commandes-up-et-down)
   - [Utilisez le 'sysfs'](#utilisez-le-sysfs)
-    - [Pour changer l'interval entre l'allumage et l'extinction de la LED:](#pour-changer-linterval-entre-lallumage-et-lextinction-de-la-led)
+    - [Pour récupérer et modifier intervalle entre l'allumage et l'extinction de la LED:](#pour-récupérer-et-modifier-intervalle-entre-lallumage-et-lextinction-de-la-led)
+    - [Pour récupérer le numéro de la LED actuellement allumée:](#pour-récupérer-le-numéro-de-la-led-actuellement-allumée)
+    - [Pour récupérer le nombre de séquences jouées:](#pour-récupérer-le-nombre-de-séquences-jouées)
+    - [Pour récupérer le nombre de séquences restantes dans la FIFO:](#pour-récupérer-le-nombre-de-séquences-restantes-dans-la-fifo)
+    - [Pour récupérer la séquence restante dans la FIFO:](#pour-récupérer-la-séquence-restante-dans-la-fifo)
   - [Démontez le module:](#démontez-le-module-2)
+- [Exercice 4 : synchronisation](#exercice-4--synchronisation)
+  - [Montez le module:](#montez-le-module-3)
+  - [Utilisez le fichier `/dev/lab5ex4` pour envoyer les commandes "up" et "down".](#utilisez-le-fichier-devlab5ex4-pour-envoyer-les-commandes-up-et-down)
+  - [Démontez le module:](#démontez-le-module-3)
 
 ___
 
@@ -140,6 +148,34 @@ cat /sys/devices/platform/soc/ff200000.drv2025/sequence
 ## Démontez le module:
 
 ```bash
-sudo rmmod lab
+sudo rmmod labex3
+```
+
+___
+
+# Exercice 4 : synchronisation
+
+## Montez le module:
+
+```bash
+sudo insmod ~/drv/lab5ex4.ko
+```
+
+```bash
+lsmod | grep lab5ex4
+```
+
+## Utilisez le fichier `/dev/lab5ex4` pour envoyer les commandes "up" et "down".
+
+```bash
+echo "up" > /dev/lab5ex4
+echo "down" > /dev/lab5ex4
+```
+
+## Démontez le module:
+
+```bash
+sudo rmmod lab5ex4
+```
 
 </div>
