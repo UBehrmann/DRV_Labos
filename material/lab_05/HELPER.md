@@ -9,6 +9,7 @@
 # Table des matières <!-- omit in toc -->
 
 - [Exercice 1 : kfifo et kthread](#exercice-1--kfifo-et-kthread)
+- [Exercice 2 : ktimer](#exercice-2--ktimer)
 
 # Exercice 1 : kfifo et kthread
 
@@ -35,7 +36,7 @@ sudo insmod ~/drv/lab5ex1.ko
 lsmod | grep lab5ex1
 ```
 
-echo "up" > /dev/chaser
+echo "up" > /dev/lab5ex1
 echo "down" > /dev/lab5ex1
 
 sudo dmesg | tail
@@ -46,6 +47,29 @@ Démontez le module:
 ```bash
 sudo rmmod lab5ex1
 ```
+
+# Exercice 2 : ktimer
+
+Montez le module:
+
+```bash
+sudo insmod ~/drv/lab5ex2.ko
+```
+
+```bash
+lsmod | grep lab5ex2
+```
+
+echo "up" > /dev/lab5ex2
+echo "down" > /dev/lab5ex2
+
+sudo dmesg | tail
+
+
+Démontez le module:
+
+```bash
+sudo rmmod lab5ex2
 ```
 
 </div>
