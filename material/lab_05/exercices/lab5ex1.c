@@ -19,7 +19,7 @@
 #define LED_COUNT 10
 #define DEFAULT_INTERVAL_MS 1000 // Default interval in milliseconds
 #define LED_OFFSET 0x00
-#define LAB5EX_MAJOR 240  // Use a static major number
+#define LAB5EX_MAJOR 240
 #define LAB5EX_NAME "lab5ex1"
 
 static struct task_struct *chaser_thread;
@@ -33,34 +33,33 @@ MODULE_PARM_DESC(interval_ms, "Interval in milliseconds between LED animations")
 
 static void __iomem *led_base_addr;
 
+// Character device open (not used, but required)
 static int chaser_open(struct inode *inode, struct file *file) { return 0; }
 
-// Update chaser_write to handle file writes
+// Write handler: accepts "up" or "down" commands and queues them
 static ssize_t chaser_write(struct file *file, const char __user *buf, size_t len, loff_t *off) {
-    char kbuf[8];  // Buffer to hold the command
+    char kbuf[8];
     char cmd;
 
-    // Ensure the input length is valid
-    if (len >= sizeof(kbuf)) return -EINVAL;
+    if (len >= sizeof(kbuf))
+        return -EINVAL;
 
-    // Copy data from user space to kernel space
-    if (copy_from_user(kbuf, buf, len)) return -EFAULT;
-    kbuf[len] = '\0';  // Null-terminate the string
+    if (copy_from_user(kbuf, buf, len))
+        return -EFAULT;
+    kbuf[len] = '\0';
 
-    // Remove trailing newline if present
-    if (kbuf[len - 1] == '\n') kbuf[len - 1] = '\0';
+    if (kbuf[len - 1] == '\n')
+        kbuf[len - 1] = '\0';
 
-    // Identify the command
     if (strcmp(kbuf, "up") == 0) {
-        cmd = 'u';  // Use 'u' for "up"
+        cmd = 'u';
     } else if (strcmp(kbuf, "down") == 0) {
-        cmd = 'd';  // Use 'd' for "down"
+        cmd = 'd';
     } else {
         pr_err("Chaser: Invalid command \"%s\"\n", kbuf);
         return -EINVAL;
     }
 
-    // Add the command to the FIFO queue
     mutex_lock(&fifo_lock);
     if (!kfifo_put(&sequence_fifo, cmd)) {
         pr_warn("Chaser: FIFO is full, command \"%s\" not added\n", kbuf);
@@ -69,43 +68,45 @@ static ssize_t chaser_write(struct file *file, const char __user *buf, size_t le
     }
     mutex_unlock(&fifo_lock);
 
-    pr_info("Chaser: Command \"%s\" added to FIFO\n", kbuf);
     return len;
 }
 
+// No read functionality
 static ssize_t chaser_read(struct file *file, char __user *buf, size_t len, loff_t *off) {
-    return 0;  // No read functionality for now
+    return 0;
 }
 
 static int chaser_release(struct inode *inode, struct file *file) { return 0; }
 
-// Add file operations for the character device
+// File operations for misc device
 static const struct file_operations lab5ex1_fops = {
     .owner = THIS_MODULE,
     .write = chaser_write,
 };
 
+// Set or clear a specific LED
 static void control_leds(int led, bool state) {
     uint32_t led_val = ioread32(led_base_addr);
 
     if (state)
-        led_val |= (1 << led);  // Turn on the LED
+        led_val |= (1 << led);
     else
-        led_val &= ~(1 << led);  // Turn off the LED
+        led_val &= ~(1 << led);
 
     iowrite32(led_val, led_base_addr);
 }
 
+// Run a sequence: up or down
 static void run_sequence(char direction) {
     int i;
 
-    if (direction == 'u') {  // Up sequence
+    if (direction == 'u') {
         for (i = 0; i < LED_COUNT; i++) {
             control_leds(i, true);
             msleep(interval_ms);
             control_leds(i, false);
         }
-    } else if (direction == 'd') {  // Down sequence
+    } else if (direction == 'd') {
         for (i = LED_COUNT - 1; i >= 0; i--) {
             control_leds(i, true);
             msleep(interval_ms);
@@ -113,14 +114,13 @@ static void run_sequence(char direction) {
         }
     }
 
-    // Turn off all LEDs at the end of the sequence
+    // Ensure all LEDs are off at the end
     iowrite32(0x0, led_base_addr);
 }
 
+// Thread function: processes queued sequences
 static int chaser_thread_fn(void *data) {
     char command;
-
-    printk(KERN_INFO "Chaser thread started\n");
 
     while (!kthread_should_stop()) {
         mutex_lock(&fifo_lock);
@@ -129,11 +129,9 @@ static int chaser_thread_fn(void *data) {
             run_sequence(command);
         } else {
             mutex_unlock(&fifo_lock);
-            msleep(100);  // Wait for new commands
+            msleep(100);
         }
     }
-
-    printk(KERN_INFO "Chaser thread stopped\n");
 
     return 0;
 }
@@ -145,11 +143,11 @@ static const struct of_device_id drv_lab5_1_id[] = {
 
 MODULE_DEVICE_TABLE(of, drv_lab5_1_id);
 
+// Probe: resource mapping, misc device registration, thread start
 static int drv_lab5_probe(struct platform_device *pdev) {
     struct resource *res;
     int ret;
 
-    // Map device memory
     res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
     if (!res) {
         pr_err("lab5ex1: Failed to get resource for drv2025\n");
@@ -163,7 +161,6 @@ static int drv_lab5_probe(struct platform_device *pdev) {
 
     INIT_KFIFO(sequence_fifo);
 
-    // Register misc device
     chaser_miscdev.minor = MISC_DYNAMIC_MINOR;
     chaser_miscdev.name = LAB5EX_NAME;
     chaser_miscdev.fops = &lab5ex1_fops;
@@ -174,7 +171,6 @@ static int drv_lab5_probe(struct platform_device *pdev) {
         return ret;
     }
 
-    // Start the kthread
     chaser_thread = kthread_run(chaser_thread_fn, NULL, "chaser_thread");
     if (IS_ERR(chaser_thread)) {
         pr_err("lab5ex1: Failed to create kthread\n");
@@ -186,6 +182,7 @@ static int drv_lab5_probe(struct platform_device *pdev) {
     return 0;
 }
 
+// Remove: stop thread and deregister device
 static int drv_lab5_remove(struct platform_device *pdev) {
     kthread_stop(chaser_thread);
     misc_deregister(&chaser_miscdev);

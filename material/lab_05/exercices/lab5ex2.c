@@ -37,9 +37,9 @@ static void __iomem *led_base_addr;
 
 static int chaser_open(struct inode *inode, struct file *file) { return 0; }
 
-// Update chaser_write to handle file writes
+// Write handler: accepts "up" or "down" commands and queues them
 static ssize_t chaser_write(struct file *file, const char __user *buf, size_t len, loff_t *off) {
-    char kbuf[8];  // Buffer to hold the command
+    char kbuf[8];
     char cmd;
 
     // Ensure the input length is valid
@@ -75,15 +75,16 @@ static ssize_t chaser_write(struct file *file, const char __user *buf, size_t le
     return len;
 }
 
+// No read functionality
 static ssize_t chaser_read(struct file *file, char __user *buf, size_t len, loff_t *off) {
-    return 0;  // No read functionality for now
+    return 0;
 }
 
 static int chaser_release(struct inode *inode, struct file *file) { return 0; }
 
-// Add file operations for the character device
+// File operations for misc device
 static const struct file_operations lab5ex2_fops = {
-    .owner = THIS_MODULE, 
+    .owner = THIS_MODULE,
     .write = chaser_write,
 };
 
@@ -130,6 +131,7 @@ static int chaser_thread_fn(void *data) {
     return 0;
 }
 
+// Set or clear a specific LED
 static void control_leds(int led, bool state) {
     uint32_t led_val = ioread32(led_base_addr);
 
