@@ -14,7 +14,7 @@
 
 # Exercice 1
 
-
+Pour la 'kfifo', j'ai ajouté un verrouillage comme indiqué pour éviter les problèmes avec les accès concurrents.
 
 # Exercice 2
 

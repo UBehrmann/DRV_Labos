@@ -8,6 +8,7 @@
 #include <linux/kfifo.h>
 #include <linux/kthread.h>
 #include <linux/module.h>
+#include <linux/miscdevice.h>
 #include <linux/mutex.h>
 #include <linux/of.h>
 #include <linux/of_address.h>
@@ -18,14 +19,13 @@
 #define LED_COUNT 10
 #define DEFAULT_INTERVAL_MS 1000 // Default interval in milliseconds
 #define LED_OFFSET 0x00
-#define LAB5EX1_MAJOR 240  // Use a static major number
-#define LAB5EX1_NAME "lab5ex1"
+#define LAB5EX_MAJOR 240  // Use a static major number
+#define LAB5EX_NAME "lab5ex1"
 
 static struct task_struct *chaser_thread;
 static DECLARE_KFIFO(sequence_fifo, char, MAX_SEQUENCES);
 static DEFINE_MUTEX(fifo_lock);
-static struct cdev lab5ex1_cdev;
-static struct class *lab5ex1_class;
+static struct miscdevice chaser_miscdev;
 
 static int interval_ms = DEFAULT_INTERVAL_MS;
 module_param(interval_ms, int, 0644);
@@ -83,6 +83,7 @@ static int chaser_release(struct inode *inode, struct file *file) { return 0; }
 static const struct file_operations lab5ex1_fops = {
     .owner = THIS_MODULE,
     .write = chaser_write,
+    // ...add open/release if needed...
 };
 
 static void control_leds(int led, bool state) {
@@ -112,6 +113,9 @@ static void run_sequence(char direction) {
             control_leds(i, false);
         }
     }
+
+    // Turn off all LEDs at the end of the sequence
+    iowrite32(0x0, led_base_addr);
 }
 
 static int chaser_thread_fn(void *data) {
@@ -146,68 +150,46 @@ static int drv_lab5_probe(struct platform_device *pdev) {
     struct resource *res;
     int ret;
 
-    pr_info("Chaser module probe\n");
-
+    // Map device memory
     res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
     if (!res) {
-        pr_err("Failed to get resource for drv2025\n");
+        pr_err("lab5ex1: Failed to get resource for drv2025\n");
         return -ENODEV;
     }
-
     led_base_addr = devm_ioremap_resource(&pdev->dev, res);
     if (IS_ERR(led_base_addr)) {
-        pr_err("Failed to map LED memory\n");
+        pr_err("lab5ex1: Failed to map LED memory\n");
         return PTR_ERR(led_base_addr);
     }
 
     INIT_KFIFO(sequence_fifo);
 
+    // Register misc device
+    chaser_miscdev.minor = MISC_DYNAMIC_MINOR;
+    chaser_miscdev.name = LAB5EX_NAME;
+    chaser_miscdev.fops = &lab5ex1_fops;
+    chaser_miscdev.mode = 0666;
+    ret = misc_register(&chaser_miscdev);
+    if (ret) {
+        pr_err("lab5ex1: Failed to register misc device\n");
+        return ret;
+    }
+
+    // Start the kthread
     chaser_thread = kthread_run(chaser_thread_fn, NULL, "chaser_thread");
     if (IS_ERR(chaser_thread)) {
-        pr_err("Failed to create kthread\n");
+        pr_err("lab5ex1: Failed to create kthread\n");
+        misc_deregister(&chaser_miscdev);
         return PTR_ERR(chaser_thread);
     }
 
-    // Register character device
-    ret = register_chrdev_region(MKDEV(LAB5EX1_MAJOR, 0), 1, LAB5EX1_NAME);
-    if (ret < 0) {
-        pr_err("Failed to register char device\n");
-        return ret;
-    }
-
-    cdev_init(&lab5ex1_cdev, &lab5ex1_fops);
-    ret = cdev_add(&lab5ex1_cdev, MKDEV(LAB5EX1_MAJOR, 0), 1);
-    if (ret < 0) {
-        unregister_chrdev_region(MKDEV(LAB5EX1_MAJOR, 0), 1);
-        pr_err("Failed to add char device\n");
-        return ret;
-    }
-
-    lab5ex1_class = class_create(THIS_MODULE, LAB5EX1_NAME);
-    if (IS_ERR(lab5ex1_class)) {
-        cdev_del(&lab5ex1_cdev);
-        unregister_chrdev_region(MKDEV(LAB5EX1_MAJOR, 0), 1);
-        return PTR_ERR(lab5ex1_class);
-    }
-
-    if (!device_create(lab5ex1_class, NULL, MKDEV(LAB5EX1_MAJOR, 0), NULL, LAB5EX1_NAME)) {
-        class_destroy(lab5ex1_class);
-        cdev_del(&lab5ex1_cdev);
-        unregister_chrdev_region(MKDEV(LAB5EX1_MAJOR, 0), 1);
-        return -ENOMEM;
-    }
-
+    pr_info("lab5ex1: Driver successfully initialized!\n");
     return 0;
 }
 
 static int drv_lab5_remove(struct platform_device *pdev) {
     kthread_stop(chaser_thread);
-
-    device_destroy(lab5ex1_class, MKDEV(LAB5EX1_MAJOR, 0));
-    class_destroy(lab5ex1_class);
-    cdev_del(&lab5ex1_cdev);
-    unregister_chrdev_region(MKDEV(LAB5EX1_MAJOR, 0), 1);
-
+    misc_deregister(&chaser_miscdev);
     pr_info("Chaser module removed\n");
     return 0;
 }
