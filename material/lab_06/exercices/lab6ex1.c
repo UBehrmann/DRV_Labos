@@ -60,14 +60,14 @@ static void adxl345_to_g(short val, char *buf) {
 }
 
 // Lecture du device : retourne la dernière mesure formatée
-static ssize_t adxl345_read(struct file *file, char __user *buf, size_t count, loff_t *ppos) {
+static ssize_t adxl345_read(struct file *file, char __user *buf, size_t count, loff_t *offset) {
     struct adxl345_data *data = container_of(file->private_data, struct adxl345_data, miscdev);
     short x, y, z;
     char outbuf[64];
     char xbuf[16], ybuf[16], zbuf[16];
     int len, ret;
 
-    if (*ppos > 0)
+    if (*offset > 0)
         return 0;
 
     ret = adxl345_read_axes(data->client, &x, &y, &z);
@@ -86,7 +86,7 @@ static ssize_t adxl345_read(struct file *file, char __user *buf, size_t count, l
     if (copy_to_user(buf, outbuf, len))
         return -EFAULT;
 
-    *ppos += len;
+    *offset += len;
     return len;
 }
 

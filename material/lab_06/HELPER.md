@@ -81,6 +81,12 @@ lsmod | grep lab6ex1
 sudo rmmod lab6ex1
 ```
 
+## Utilisez le fichier `/dev/adxl345` pour lire les données
+
+```bash
+watch cat /dev/adxl345
+```
+
 # Exercice 2
 
 | Adresse | Nom du périphérique |
@@ -93,5 +99,28 @@ sudo rmmod lab6ex1
 | 0x2B    | ACT_TAP_STATUS      |
 | 0x2E    | INT_ENABLE          |
 | 0x30    | INT_SOURCE          |
+
+## Montez le module:
+
+```bash
+sudo insmod ~/drv/lab6ex2.ko
+```
+
+```bash
+lsmod | grep lab6ex2
+```
+
+## Démontez le module:
+
+```bash
+sudo rmmod lab6ex2
+```
+
+## Suivre les interruptions
+
+```bash
+watch cat /proc/interrupts
+sudo dmesg | tail
+```
 
 </div>
