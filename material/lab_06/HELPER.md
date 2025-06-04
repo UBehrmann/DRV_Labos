@@ -123,4 +123,40 @@ watch cat /proc/interrupts
 sudo dmesg | tail
 ```
 
+# Exercice 3
+
+## Montez le module:
+
+```bash
+sudo insmod ~/drv/lab6ex3.ko
+```
+
+```bash
+lsmod | grep lab6ex3
+```
+
+## Démontez le module:
+
+```bash
+sudo rmmod lab6ex3
+```
+
+## Suivre les interruptions
+
+```bash
+watch cat /proc/interrupts
+sudo dmesg | tail
+```
+
+## Test sysfs
+
+```bash
+cat /sys/devices/platform/soc/ffc04000.i2c/i2c-0/0-0053/tap_axis
+echo "x" > /sys/devices/platform/soc/ffc04000.i2c/i2c-0/0-0053/tap_axis
+cat /sys/devices/platform/soc/ffc04000.i2c/i2c-0/0-0053/tap_mode
+echo "single" > /sys/devices/platform/soc/ffc04000.i2c/i2c-0/0-0053/tap_mode
+cat /sys/devices/platform/soc/ffc04000.i2c/i2c-0/0-0053/tap_wait
+cat /sys/devices/platform/soc/ffc04000.i2c/i2c-0/0-0053/tap_count
+```
+
 </div>
